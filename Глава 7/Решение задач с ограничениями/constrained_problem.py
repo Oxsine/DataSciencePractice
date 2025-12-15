@@ -14,35 +14,35 @@ def constraint_odd_even(variables, values):
     else:
         return values[1] % 2 == 0
 
-if __name__=='__main__':
-    variables = ('Иван', 'Аня', 'Толик', 'Павел')
+if __name__ == '__main__':
+    variables = ('Джон', 'Анна', 'Том', 'Патрисия')
 
     domains = {
-        'Иван': [1, 2, 3],
-        'Аня': [1, 3],
-        'Толик': [2, 4],
-        'Павел': [2, 3, 4],
+        'Джон': [1, 2, 3, 4],
+        'Анна': [1, 3, 5],
+        'Том': [2, 4, 3],
+        'Патрисия': [2, 3, 4, 5],
     }
 
     constraints = [
-        (('Иван', 'Аня', 'Толик'), constraint_unique),
-        (('Толик', 'Аня'), constraint_bigger),
-        (('Иван', 'Павел'), constraint_odd_even),
+        (('Джон', 'Анна', 'Том'), constraint_unique), 
+        (('Том', 'Анна'), constraint_bigger),          
+        (('Джон', 'Патрисия'), constraint_odd_even),   
     ]
 
     problem = CspProblem(variables, domains, constraints)
 
-    print('\nРешение:\n\nНормальное:', backtrack(problem))
+    print('\nРешения:\n\nОбычный поиск:', backtrack(problem))
     print('\nНаиболее ограниченная переменная:', backtrack(problem, 
             variable_heuristic=MOST_CONSTRAINED_VARIABLE))
-    print('\nПеременная наивысшей степени:', backtrack(problem, 
+    print('\nПеременная с наибольшей степенью:', backtrack(problem, 
             variable_heuristic=HIGHEST_DEGREE_VARIABLE))
-    print('\nНаименьшее ограничивающее значение:', backtrack(problem, 
+    print('\nНаименее ограничивающее значение:', backtrack(problem, 
             value_heuristic=LEAST_CONSTRAINING_VALUE))
-    print('\nНаиболее ограничивающая переменная и наименее ограничивающее значение:', 
+    print('\nНаиболее ограниченная переменная и наименее ограничивающее значение:', 
             backtrack(problem, variable_heuristic=MOST_CONSTRAINED_VARIABLE, 
             value_heuristic=LEAST_CONSTRAINING_VALUE))
-    print('\nНаивысшая степень и наименьшее ограничивающее значение:', 
+    print('\nНаибольшая степень и наименее ограничивающее значение:', 
             backtrack(problem, variable_heuristic=HIGHEST_DEGREE_VARIABLE, 
             value_heuristic=LEAST_CONSTRAINING_VALUE))
-    print('\nМинимум конфликтов:', min_conflicts(problem))
+    print('\nМинимальные конфликты:', min_conflicts(problem))

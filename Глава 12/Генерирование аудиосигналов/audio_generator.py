@@ -27,7 +27,7 @@ signal = signal[:200]
 time_axis = 1000 * np.arange(0, len(signal), 1) / float(sampling_freq) 
 
 plt.plot(time_axis, signal, color='black')
-plt.xlabel('Time (milliseconds)')
-plt.ylabel('Amplitude')
-plt.title('Generated audio signal')
+plt.xlabel('Время (миллисекунды)')
+plt.ylabel('Амплитуда')
+plt.title('Сгенерированный аудиосигнал')
 plt.show()

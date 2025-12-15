@@ -2,12 +2,11 @@ import argparse
 import simpleai.search as ss 
 
 def build_arg_parser():
-    parser = argparse.ArgumentParser(description='Creates the input string \
-            using the greedy algorithm')
+    parser = argparse.ArgumentParser(description='Создаёт целевую строку с помощью жадного алгоритма')
     parser.add_argument("--input-string", dest="input_string", required=True,
-            help="Input string")
+            help="Целевая строка")
     parser.add_argument("--initial-state", dest="initial_state", required=False,
-            default='', help="Starting point for the search")
+            default='', help="Начальное состояние для поиска")
     return parser
 
 class CustomProblem(ss.SearchProblem):
@@ -16,7 +15,7 @@ class CustomProblem(ss.SearchProblem):
 
     def actions(self, cur_state):
         if len(cur_state) < len(self.target_string):
-            alphabets = 'abcdefghijklmnopqrstuvwxyz'
+            alphabets = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
             return list(alphabets + ' ' + alphabets.upper())
         else:
             return []
@@ -35,7 +34,7 @@ class CustomProblem(ss.SearchProblem):
 
         return dist + diff 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     args = build_arg_parser().parse_args()
 
     problem = CustomProblem()
@@ -45,8 +44,7 @@ if __name__=='__main__':
 
     output = ss.greedy(problem)
 
-    print('\nTarget string:', args.input_string)
-    print('\nPath to the solution:')
+    print('\nЦелевая строка:', args.input_string)
+    print('\nПуть к решению:')
     for item in output.path():
         print(item)
-        

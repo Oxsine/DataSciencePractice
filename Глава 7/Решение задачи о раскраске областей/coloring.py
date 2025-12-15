@@ -3,38 +3,37 @@ from simpleai.search import CspProblem, backtrack
 def constraint_func(names, values):
     return values[0] != values[1]  
 
-if __name__=='__main__':
-    names = ('Mark', 'Julia', 'Steve', 'Amanda', 'Brian', 
-            'Joanne', 'Derek', 'Allan', 'Michelle', 'Kelly')
+if __name__ == '__main__':
+    names = ('Марк', 'Джулия', 'Стив', 'Аманда', 'Брайан', 
+             'Джоанн', 'Дерек', 'Аллан', 'Мишель', 'Келли')
     
-    colors = dict((name, ['red', 'green', 'blue', 'gray']) for name in names)
+    colors = dict((name, ['красный', 'зелёный', 'синий', 'серый']) for name in names)
 
     constraints = [
-        (('Mark', 'Julia'), constraint_func),
-        (('Mark', 'Steve'), constraint_func),
-        (('Julia', 'Steve'), constraint_func),
-        (('Julia', 'Amanda'), constraint_func),
-        (('Julia', 'Derek'), constraint_func),
-        (('Julia', 'Brian'), constraint_func),
-        (('Steve', 'Amanda'), constraint_func),
-        (('Steve', 'Allan'), constraint_func),
-        (('Steve', 'Michelle'), constraint_func),
-        (('Amanda', 'Michelle'), constraint_func),
-        (('Amanda', 'Joanne'), constraint_func),
-        (('Amanda', 'Derek'), constraint_func),
-        (('Brian', 'Derek'), constraint_func),
-        (('Brian', 'Kelly'), constraint_func),
-        (('Joanne', 'Michelle'), constraint_func),
-        (('Joanne', 'Amanda'), constraint_func),
-        (('Joanne', 'Derek'), constraint_func),
-        (('Joanne', 'Kelly'), constraint_func),
-        (('Derek', 'Kelly'), constraint_func),
+        (('Марк', 'Джулия'), constraint_func),
+        (('Марк', 'Стив'), constraint_func),
+        (('Джулия', 'Стив'), constraint_func),
+        (('Джулия', 'Аманда'), constraint_func),
+        (('Джулия', 'Дерек'), constraint_func),
+        (('Джулия', 'Брайан'), constraint_func),
+        (('Стив', 'Аманда'), constraint_func),
+        (('Стив', 'Аллан'), constraint_func),
+        (('Стив', 'Мишель'), constraint_func),
+        (('Аманда', 'Мишель'), constraint_func),
+        (('Аманда', 'Джоанн'), constraint_func),
+        (('Аманда', 'Дерек'), constraint_func),
+        (('Брайан', 'Дерек'), constraint_func),
+        (('Брайан', 'Келли'), constraint_func),
+        (('Джоанн', 'Мишель'), constraint_func),
+        (('Джоанн', 'Аманда'), constraint_func),
+        (('Джоанн', 'Дерек'), constraint_func),
+        (('Джоанн', 'Келли'), constraint_func),
+        (('Дерек', 'Келли'), constraint_func),
     ]
 
     problem = CspProblem(names, colors, constraints)
 
     output = backtrack(problem)
-    print('\nColor mapping:\n')
+    print('\nРаспределение цветов:\n')
     for k, v in output.items():
         print(k, '==>', v)
-    
