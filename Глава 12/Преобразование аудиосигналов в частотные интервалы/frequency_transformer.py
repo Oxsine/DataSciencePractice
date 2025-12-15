@@ -29,6 +29,6 @@ x_axis = np.arange(0, len_half, 1) * (sampling_freq / len_signal) / 1000.0
 
 plt.figure()
 plt.plot(x_axis, signal_power, color='black')
-plt.xlabel('Frequency (kHz)')
-plt.ylabel('Signal power (dB)')
+plt.xlabel('Частота (кГц)')
+plt.ylabel('Мощность сигнала (дБ)')
 plt.show()

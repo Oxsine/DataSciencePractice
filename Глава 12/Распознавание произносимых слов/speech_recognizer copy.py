@@ -9,10 +9,9 @@ from hmmlearn import hmm
 from python_speech_features import mfcc
 
 def build_arg_parser():
-    parser = argparse.ArgumentParser(description='Trains the HMM-based speech \
-            recognition system')
+    parser = argparse.ArgumentParser(description='Обучает систему распознавания речи на основе HMM')
     parser.add_argument("--input-folder", dest="input_folder", required=True,
-            help="Input folder containing the audio files for training")
+            help="Входная папка с аудиофайлами для обучения")
     return parser
 
 class ModelHMM(object):
@@ -96,10 +95,10 @@ def run_tests(test_files):
         start_index = test_file.find('/') + 1
         end_index = test_file.rfind('/')
         original_label = test_file[start_index:end_index]
-        print('\nOriginal: ', original_label + "v") 
-        print('Predicted:', predicted_label)
+        print('\nОригинал: ', original_label + "v") 
+        print('Предсказано:', predicted_label)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     args = build_arg_parser().parse_args()
     input_folder = args.input_folder
 

@@ -73,10 +73,10 @@ result = astar(PuzzleSolver(INITIAL))
 for i, (action, state) in enumerate(result.path()):
     print()
     if action == None:
-        print('Initial configuration')
+        print('Начальная конфигурация')
     elif i == len(result.path()) - 1:
-        print('After moving', action, 'into the empty space. Goal achieved!')
+        print('После передвижения', action, 'в пустую клетку. Цель достигнута!')
     else:
-        print('After moving', action, 'into the empty space')
+        print('После передвижения', action, 'в пустую клетку')
 
     print(state)
