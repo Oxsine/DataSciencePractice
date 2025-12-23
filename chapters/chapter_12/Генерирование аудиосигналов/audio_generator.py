@@ -1,33 +1,51 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.io.wavfile import write
+import numpy as np  # Импорт библиотеки для работы с массивами и математических операций
+import matplotlib.pyplot as plt  # Импорт библиотеки для построения графиков
+from scipy.io.wavfile import write  # Импорт функции записи WAV файлов из библиотеки SciPy
 
+# Имя файла для сохранения сгенерированного аудио
 output_file = 'generated_audio.wav'
 
-duration = 4
-sampling_freq = 44100
-tone_freq = 784 
-min_val = -4 * np.pi
-max_val = 4 * np.pi
+# Параметры генерации аудиосигнала
+duration = 4  # Продолжительность сигнала в секундах
+sampling_freq = 44100  # Частота дискретизации (стандартная для аудио - 44.1 кГц)
+tone_freq = 784  # Частота тона в Гц (нота С5 в музыкальной нотации)
+min_val = -4 * np.pi  # Минимальное значение для временной оси (в радианах)
+max_val = 4 * np.pi  # Максимальное значение для временной оси (в радианах)
 
+# Создание временной оси (массив временных меток)
+# np.linspace создает равномерно распределенные значения от min_val до max_val
+# Количество точек = длительность (сек) × частота дискретизации (Гц)
 t = np.linspace(min_val, max_val, duration * sampling_freq)
+
+# Генерация чистого синусоидального сигнала с заданной частотой
+# Формула: A * sin(2π * f * t), где A=1 (амплитуда), f - частота тона
 signal = np.sin(2 * np.pi * tone_freq * t)
 
+# Добавление случайного шума к сигналу для создания более реалистичного звука
+# np.random.rand генерирует случайные числа от 0 до 1 в форме массива
+# 0.5 - коэффициент, определяющий уровень шума относительно сигнала
 noise = 0.5 * np.random.rand(duration * sampling_freq)
-signal += noise
+signal += noise  # Добавляем шум к исходному сигналу
 
-scaling_factor = np.power(2, 15) - 1
-signal_normalized = signal / np.max(np.abs(signal))
-signal_scaled = np.int16(signal_normalized * scaling_factor)
+# Подготовка сигнала для записи в 16-битный WAV файл
+scaling_factor = np.power(2, 15) - 1  # Максимальное значение для 16-битного знакового целого (32767)
+signal_normalized = signal / np.max(np.abs(signal))  # Нормализация к диапазону [-1, 1]
+signal_scaled = np.int16(signal_normalized * scaling_factor)  # Преобразование к 16-битному формату
 
+# Запись сгенерированного аудиосигнала в WAV файл
 write(output_file, sampling_freq, signal_scaled)
 
+# Для визуализации берем только первые 200 отсчетов сигнала
 signal = signal[:200]
 
-time_axis = 1000 * np.arange(0, len(signal), 1) / float(sampling_freq) 
+# Создание временной оси в миллисекундах для графика
+# arange создает массив индексов от 0 до 199
+# Каждый индекс преобразуется во время: (индекс / частота дискретизации) * 1000
+time_axis = 1000 * np.arange(0, len(signal), 1) / float(sampling_freq)
 
-plt.plot(time_axis, signal, color='black')
-plt.xlabel('Время (миллисекунды)')
-plt.ylabel('Амплитуда')
-plt.title('Сгенерированный аудиосигнал')
-plt.show()
+# Построение графика сгенерированного аудиосигнала
+plt.plot(time_axis, signal, color='black')  # Черная линия сигнала
+plt.xlabel('Время (миллисекунды)')  # Подпись оси X
+plt.ylabel('Амплитуда')  # Подпись оси Y
+plt.title('Сгенерированный аудиосигнал')  # Заголовок графика
+plt.show()  # Отображение графика
