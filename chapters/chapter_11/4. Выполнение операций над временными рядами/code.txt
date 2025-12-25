@@ -1,0 +1,132 @@
+import numpy as np 
+import pandas as pd
+import matplotlib.pyplot as plt 
+
+# Имя входного файла
+input_file = 'data_2D.txt'
+
+try:
+    # Пробуем загрузить данные
+    data_array = np.loadtxt(input_file)
+    
+    # Предполагаем формат данных
+    if len(data_array.shape) == 1:
+        # Если это 1D массив
+        print("Загружен 1D массив, создаем тестовые данные...")
+        raise Exception("1D array")
+    
+    # Проверяем размерность
+    print(f"Размер загруженных данных: {data_array.shape}")
+    
+    # Берем нужные столбцы
+    if data_array.shape[1] >= 3:
+        X1 = data_array[:, 1]  # Второй столбец
+        X2 = data_array[:, 2]  # Третий столбец
+    elif data_array.shape[1] == 2:
+        X1 = data_array[:, 0]  # Первый столбец
+        X2 = data_array[:, 1]  # Второй столбец
+    else:
+        print("Недостаточно столбцов в данных")
+        X1 = data_array[:, 0]
+        X2 = np.zeros_like(X1)
+        
+except Exception as e:
+    print(f"Ошибка загрузки или недостаточно данных: {e}")
+    print("Создание тестовых данных...")
+    # Создаем тестовые данные с явными датами в индексе
+    dates = pd.date_range(start='1960-01-01', periods=200, freq='M')
+    X1 = 45 + 10 * np.sin(np.linspace(0, 4*np.pi, 200)) + np.random.normal(0, 3, 200)
+    X2 = 35 + 8 * np.cos(np.linspace(0, 4*np.pi, 200)) + np.random.normal(0, 2, 200)
+    
+    # Сохраняем тестовые данные
+    test_data = np.column_stack([range(len(dates)), X1, X2])
+    np.savetxt('data_2D.txt', test_data)
+    print("Создан тестовый файл data_2D.txt")
+    
+    # Создаем даты для индекса
+    dates = pd.date_range(start='1960-01-01', periods=len(X1), freq='M')
+
+# Создание DataFrame с ДАТАМИ в качестве индекса
+if 'dates' not in locals():
+    # Если даты не созданы, создаем их
+    dates = pd.date_range(start='1960-01-01', periods=len(X1), freq='M')
+
+data = pd.DataFrame({'dim1': X1, 'dim2': X2}, index=dates)
+
+print(f"Создан DataFrame с {len(data)} записями")
+print(f"Диапазон дат: от {data.index[0]} до {data.index[-1]}")
+print(f"\nПервые 5 строк данных:")
+print(data.head())
+
+# Построение графика с проверкой диапазона дат
+start = '1968-01-01'
+end = '1975-12-31'
+
+# Проверяем, что запрошенные даты существуют в данных
+if start in data.index or (data.index[0] <= pd.Timestamp(start) <= data.index[-1]):
+    data[start:end].plot()
+    plt.title('Наложение двух графиков (1968-1975)')
+    plt.xlabel('Дата')
+    plt.ylabel('Значения')
+    plt.grid(True, alpha=0.3)
+else:
+    print(f"Диапазон {start}:{end} не найден в данных")
+    print(f"Доступный диапазон: {data.index[0]} - {data.index[-1]}")
+    # Показываем все данные
+    data.plot()
+    plt.title('Все данные')
+    plt.xlabel('Дата')
+    plt.ylabel('Значения')
+
+# Фильтрация с использованием условий
+plt.figure()
+filtered_data = data[(data['dim1'] < 45) & (data['dim2'] > 30)]
+if not filtered_data.empty:
+    filtered_data.plot()
+    plt.title('Фильтр: dim1 < 45 и dim2 > 30')
+    plt.xlabel('Дата')
+    plt.ylabel('Значения')
+    plt.grid(True, alpha=0.3)
+    print(f"\nНайдено {len(filtered_data)} записей по фильтру")
+else:
+    print("\nНет данных, соответствующих условиям фильтрации")
+    # Показываем распределение для понимания
+    plt.subplot(2, 1, 1)
+    plt.hist(data['dim1'], bins=30, alpha=0.7, label='dim1')
+    plt.axvline(x=45, color='r', linestyle='--', label='Порог 45')
+    plt.title('Распределение dim1')
+    plt.legend()
+    
+    plt.subplot(2, 1, 2)
+    plt.hist(data['dim2'], bins=30, alpha=0.7, label='dim2', color='orange')
+    plt.axvline(x=30, color='r', linestyle='--', label='Порог 30')
+    plt.title('Распределение dim2')
+    plt.legend()
+
+# Сложение двух фреймов данных
+plt.figure()
+if start in data.index or (data.index[0] <= pd.Timestamp(start) <= data.index[-1]):
+    diff = data[start:end]['dim1'] + data[start:end]['dim2']
+    diff.plot()
+    plt.title(f'Сумма (dim1 + dim2) за {start[:4]}-{end[:4]}')
+    plt.xlabel('Дата')
+    plt.ylabel('Сумма')
+    plt.grid(True, alpha=0.3)
+else:
+    # Суммируем все данные
+    diff = data['dim1'] + data['dim2']
+    diff.plot()
+    plt.title('Сумма (dim1 + dim2) за весь период')
+    plt.xlabel('Дата')
+    plt.ylabel('Сумма')
+
+plt.tight_layout()
+plt.show()
+
+# Дополнительная статистика
+print("\n" + "="*50)
+print("СТАТИСТИКА ДАННЫХ:")
+print("="*50)
+print(f"dim1: среднее = {data['dim1'].mean():.2f}, std = {data['dim1'].std():.2f}")
+print(f"dim2: среднее = {data['dim2'].mean():.2f}, std = {data['dim2'].std():.2f}")
+print(f"\nКорреляция между dim1 и dim2: {data['dim1'].corr(data['dim2']):.3f}")
