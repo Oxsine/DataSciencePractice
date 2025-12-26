@@ -1,0 +1,333 @@
+#1
+
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_regression
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import ExtraTreesClassifier
+
+# Создаем синтетический набор данных для классификации
+sample_count = 150
+feature_count = 25
+class_count = 3
+informative_features = 6
+redundant_features = 0
+seed_value = 7
+
+features, targets = make_classification(
+    n_samples=sample_count,
+    n_features=feature_count,
+    n_classes=class_count,
+    n_informative=informative_features,
+    n_redundant=redundant_features,
+    random_state=seed_value
+)
+
+# Создаем селектор для отбора наиболее значимых признаков
+feature_selector = SelectKBest(
+    score_func=f_regression, 
+    k=9
+)
+
+# Конфигурируем модель классификатора
+tree_classifier = ExtraTreesClassifier(
+    n_estimators=60,
+    max_depth=4
+)
+
+# Формируем последовательность обработки данных
+processing_steps = [
+    ('feature_selection', feature_selector),
+    ('classification_model', tree_classifier)
+]
+
+ml_pipeline = Pipeline(steps=processing_steps)
+
+# Модифицируем параметры компонентов конвейера
+ml_pipeline.set_params(
+    feature_selection__k=7,
+    classification_model__n_estimators=30
+)
+
+# Обучаем модель на предоставленных данных
+ml_pipeline.fit(features, targets)
+
+# Получаем прогнозы для обучающей выборки
+predictions = ml_pipeline.predict(features)
+print("\nПрогнозы модели:\n", predictions)
+
+# Оцениваем качество модели на обучающих данных
+accuracy_score = ml_pipeline.score(features, targets)
+print("\nТочность на обучающих данных: {:.4f}".format(accuracy_score))
+
+# Извлекаем информацию об отобранных признаках
+selector_component = ml_pipeline.named_steps['feature_selection']
+selected_mask = selector_component.get_support()
+
+# Определяем индексы выбранных признаков
+selected_indices = []
+for idx, is_selected in enumerate(selected_mask):
+    if is_selected:
+        selected_indices.append(idx)
+
+print("\nИндексы отобранных признаков:", end=" ")
+print(*selected_indices, sep=', ')
+
+#2
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neighbors import NearestNeighbors
+
+# Координаты точек в двумерном пространстве
+coordinates = np.array([
+    [2.1, 1.3], [1.3, 3.2], [2.9, 2.5], [2.7, 5.4], 
+    [3.8, 0.9], [7.3, 2.1], [4.2, 6.5], [3.8, 3.7], 
+    [2.5, 4.1], [3.4, 1.9], [5.7, 3.5], [6.1, 4.3], 
+    [5.1, 2.2], [6.2, 1.1]
+])
+
+# Координаты исследуемой точки
+target_point = [4.3, 2.7]
+
+# Количество соседей для анализа
+neighbor_count = 5
+
+# Создание графика исходного набора точек
+plt.figure(figsize=(10, 8))
+plt.subplot(1, 2, 1)
+plt.title('Исходное распределение точек', fontsize=14, pad=15)
+plt.scatter(coordinates[:, 0], coordinates[:, 1], 
+           s=85, color='darkblue', alpha=0.7, 
+           edgecolors='black', linewidth=1.5)
+plt.grid(True, alpha=0.3)
+plt.xlabel('Ось X', fontsize=12)
+plt.ylabel('Ось Y', fontsize=12)
+
+# Инициализация и обучение модели поиска ближайших соседей
+neighbor_model = NearestNeighbors(
+    n_neighbors=neighbor_count, 
+    algorithm='ball_tree'
+)
+neighbor_model.fit(coordinates)
+
+# Поиск соседних точек для целевой точки
+point_distances, point_indices = neighbor_model.kneighbors([target_point])
+
+# Отображение результатов поиска соседей
+print("Результаты поиска ближайших точек:")
+print("Целевая точка:", target_point)
+print("-" * 40)
+
+for position, idx in enumerate(point_indices[0], 1):
+    point_coords = coordinates[idx]
+    distance_val = point_distances[0][position-1]
+    print(f"Сосед #{position}: координаты {point_coords}, "
+          f"расстояние {distance_val:.3f}")
+
+# Визуализация результатов
+plt.subplot(1, 2, 2)
+plt.title('Ближайшие соседние точки', fontsize=14, pad=15)
+
+# Отображение всех исходных точек
+plt.scatter(coordinates[:, 0], coordinates[:, 1], 
+           s=85, color='gray', alpha=0.5, 
+           edgecolors='black', linewidth=1, label='Все точки')
+
+# Выделение ближайших соседей
+neighbor_points = coordinates[point_indices[0]]
+plt.scatter(neighbor_points[:, 0], neighbor_points[:, 1], 
+           s=300, facecolors='none', 
+           edgecolors='red', linewidth=3, 
+           label=f'Ближайшие {neighbor_count} точек')
+
+# Отображение целевой точки
+plt.scatter(target_point[0], target_point[1], 
+           s=150, marker='X', color='green', 
+           linewidth=3, label='Целевая точка')
+
+plt.grid(True, alpha=0.3)
+plt.xlabel('Ось X', fontsize=12)
+plt.ylabel('Ось Y', fontsize=12)
+plt.legend(loc='upper right', fontsize=10)
+plt.tight_layout()
+
+plt.show()
+
+# Дополнительная статистика
+print("\n" + "=" * 50)
+print("Статистическая сводка:")
+print(f"Общее количество точек: {len(coordinates)}")
+print(f"Минимальное расстояние: {point_distances[0][0]:.3f}")
+print(f"Максимальное расстояние среди соседей: {point_distances[0][-1]:.3f}")
+print(f"Среднее расстояние до соседей: {np.mean(point_distances[0]):.3f}")
+
+#3
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import colors
+from sklearn.neighbors import KNeighborsClassifier
+
+# Инициализация данных
+dataset_file = 'data.txt'
+raw_data = np.loadtxt(dataset_file, delimiter=',')
+
+# Разделение на признаки и метки классов
+features = raw_data[:, :-1]
+class_labels = raw_data[:, -1].astype(np.int32)
+
+# Определение стилей маркеров для разных классов
+marker_styles = ['o', 's', 'D', '^', 'v', '<', '>', 'p', '*', 'h', 'H', 'd']
+marker_mapping = [marker_styles[label % len(marker_styles)] for label in class_labels]
+
+# Построение графика исходных данных
+fig, axes = plt.subplots(2, 2, figsize=(14, 12))
+fig.suptitle('Анализ классификации методом k-ближайших соседей', fontsize=16)
+
+# График 1: Исходное распределение данных
+ax1 = axes[0, 0]
+ax1.set_title('Распределение объектов по классам', pad=12)
+for class_id in np.unique(class_labels):
+    class_mask = class_labels == class_id
+    ax1.scatter(features[class_mask, 0], features[class_mask, 1], 
+                marker=marker_styles[class_id % len(marker_styles)],
+                s=80, alpha=0.8, edgecolor='darkgray', linewidth=1.2,
+                label=f'Класс {class_id}')
+ax1.grid(True, linestyle='--', alpha=0.4)
+ax1.set_xlabel('Признак 1', fontsize=11)
+ax1.set_ylabel('Признак 2', fontsize=11)
+ax1.legend(loc='best')
+
+# Параметры модели
+neighbor_count = 12
+grid_resolution = 0.02
+
+# Создание и обучение классификатора
+knn_classifier = KNeighborsClassifier(
+    n_neighbors=neighbor_count,
+    weights='distance',
+    algorithm='auto'
+)
+knn_classifier.fit(features, class_labels)
+
+# Создание координатной сетки для визуализации решений
+x_coord_min, x_coord_max = features[:, 0].min() - 1.2, features[:, 0].max() + 1.2
+y_coord_min, y_coord_max = features[:, 1].min() - 1.2, features[:, 1].max() + 1.2
+
+grid_x, grid_y = np.meshgrid(
+    np.arange(x_coord_min, x_coord_max, grid_resolution),
+    np.arange(y_coord_min, y_coord_max, grid_resolution)
+)
+
+# Прогнозирование классов для всех точек сетки
+grid_predictions = knn_classifier.predict(
+    np.column_stack([grid_x.ravel(), grid_y.ravel()])
+)
+decision_grid = grid_predictions.reshape(grid_x.shape)
+
+# График 2: Области решений классификатора
+ax2 = axes[0, 1]
+ax2.set_title(f'Области решений (k={neighbor_count})', pad=12)
+color_map = plt.cm.get_cmap('tab20c', len(np.unique(class_labels)))
+ax2.pcolormesh(grid_x, grid_y, decision_grid, cmap=color_map, alpha=0.6, shading='auto')
+
+# Отображение исходных точек поверх областей решений
+for class_id in np.unique(class_labels):
+    class_mask = class_labels == class_id
+    ax2.scatter(features[class_mask, 0], features[class_mask, 1],
+                marker=marker_styles[class_id % len(marker_styles)],
+                s=70, edgecolor='black', linewidth=1.2)
+ax2.set_xlabel('Признак 1', fontsize=11)
+ax2.set_ylabel('Признак 2', fontsize=11)
+
+# Тестирование на новой точке
+test_point_coords = np.array([5.1, 3.6])
+
+# График 3: Тестовая точка среди исходных данных
+ax3 = axes[1, 0]
+ax3.set_title('Расположение тестовой точки', pad=12)
+for class_id in np.unique(class_labels):
+    class_mask = class_labels == class_id
+    ax3.scatter(features[class_mask, 0], features[class_mask, 1],
+                marker=marker_styles[class_id % len(marker_styles)],
+                s=70, alpha=0.7, edgecolor='gray', linewidth=1)
+ax3.scatter(test_point_coords[0], test_point_coords[1],
+            marker='X', s=200, color='red', linewidth=2.5,
+            label='Тестовая точка', zorder=10)
+ax3.grid(True, linestyle='--', alpha=0.4)
+ax3.set_xlabel('Признак 1', fontsize=11)
+ax3.set_ylabel('Признак 2', fontsize=11)
+ax3.legend(loc='best')
+
+# Определение ближайших соседей для тестовой точки
+neighbor_indices = knn_classifier.kneighbors(
+    [test_point_coords], 
+    n_neighbors=neighbor_count, 
+    return_distance=False
+)[0]
+
+# График 4: Ближайшие соседи тестовой точки
+ax4 = axes[1, 1]
+ax4.set_title(f'Ближайшие {neighbor_count} соседей', pad=12)
+
+# Отображение всех исходных точек
+for class_id in np.unique(class_labels):
+    class_mask = class_labels == class_id
+    ax4.scatter(features[class_mask, 0], features[class_mask, 1],
+                marker=marker_styles[class_id % len(marker_styles)],
+                s=50, alpha=0.3, color='lightgray', edgecolor='gray', linewidth=0.5)
+
+# Выделение ближайших соседей
+for idx in neighbor_indices:
+    ax4.scatter(features[idx, 0], features[idx, 1],
+                marker=marker_styles[class_labels[idx] % len(marker_styles)],
+                s=120, alpha=0.9, edgecolor='black', linewidth=2)
+
+# Отображение тестовой точки
+ax4.scatter(test_point_coords[0], test_point_coords[1],
+            marker='X', s=220, color='darkred', linewidth=3.5,
+            label='Тестовая точка', zorder=10)
+
+ax4.grid(True, linestyle='--', alpha=0.4)
+ax4.set_xlabel('Признак 1', fontsize=11)
+ax4.set_ylabel('Признак 2', fontsize=11)
+ax4.legend(loc='best')
+
+plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+
+# Прогнозирование класса для тестовой точки
+predicted_class = knn_classifier.predict([test_point_coords])[0]
+
+# Вывод результатов анализа
+print("=" * 60)
+print("АНАЛИЗ КЛАССИФИКАЦИИ МЕТОДОМ k-БЛИЖАЙШИХ СОСЕДЕЙ")
+print("=" * 60)
+print(f"Общее количество объектов: {len(features)}")
+print(f"Количество признаков: {features.shape[1]}")
+print(f"Количество уникальных классов: {len(np.unique(class_labels))}")
+print(f"Параметр k (количество соседей): {neighbor_count}")
+print(f"Координаты тестовой точки: {test_point_coords}")
+print(f"Предсказанный класс: {predicted_class}")
+print("=" * 60)
+
+# Отображение индексов ближайших соседей
+print("\nИндексы ближайших соседей:")
+for i, idx in enumerate(neighbor_indices, 1):
+    point_class = class_labels[idx]
+    print(f"{i:2d}. Индекс: {idx:3d}, Координаты: [{features[idx, 0]:.2f}, {features[idx, 1]:.2f}], Класс: {point_class}")
+
+plt.show()
+
+#4
+
+не выполняется из-за отсутствия файла
+
+#5
+
+не выполняется из-за отсутствия файла
+
+#6
+
+не выполняется из-за отсутствия файла
