@@ -12,9 +12,9 @@ DataSciencePractice/
 ├── README.md                    # Описание проекта
 ├── .gitignore                   # Игнорируемые файлы
 ├── requirements.txt             # Зависимости Python
-├── setup.sh                     # Установка для Linux/Mac
-├── setup.ps1                    # Установка для Windows PowerShell
-├── setup.bat                    # Установка для Windows CMD
+├── startup.sh                   # Установка для Linux/Mac
+├── startup.ps1                  # Установка для Windows PowerShell
+├── manual.md                    # Инструкция для виртуальной среды
 ├── chapters/             
 ```
 
@@ -29,10 +29,10 @@ cd DataSciencePractice
 ### **2. Установка окружения**
 ```bash
 # Windows
-setup.bat
+./starup.ps1
 
-# Linux/Mac
-bash setup.sh
+# Дистрибутивы Linux/Mac
+bash startup.sh
 ```
 
 ### **3. Активация окружения**
