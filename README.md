@@ -30,7 +30,6 @@ cd DataSciencePractice
 ### **2. Установка окружения**
 ```bash
 # Windows
-
 ./starup.ps1
 
 # Дистрибутивы Linux/Mac
