@@ -1,0 +1,41 @@
+cat > .gitignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+venv_data_science/
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (если большие)
+*.csv
+*.xlsx
+*.json
+*.pkl
+/utils
+
+# Outputs (опционально)
+# outputs/
+# pictures/
+
+# Environment variables
+.env
+EOF
